@@ -1,9 +1,20 @@
 const { Op } = require('sequelize');
 const { validationResult } = require('express-validator');
+const jwt = require('jsonwebtoken');
+
+const { hashPassword, comparePassword } = require('../validations/validators');
 
 const User = require('../models/userModel');
 
-const { hashPassword, comparePassword } = require('../validations/validators');
+const signToken = (id) => {
+  const payload = { id };
+
+  const token = jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
+
+  return token;
+};
 
 exports.register = async (req, res) => {
   try {
@@ -39,14 +50,13 @@ exports.register = async (req, res) => {
       password: hashedPassword,
     });
 
+    newUser.password = undefined;
+    const token = signToken(newUser.username);
+
     res.status(201).json({
       status: 'success',
-      // user: {
-      //   name: newUser.name,
-      //   username: newUser.username,
-      //   email: newUser.email,
-      //   created_at: newUser.created_at,
-      // },
+      token,
+      user: newUser,
     });
   } catch (err) {
     res.status(500).json({ status: 'fail', message: err.message });
@@ -68,7 +78,7 @@ exports.login = async (req, res) => {
       where: {
         email,
       },
-      attributes: ['email', 'password', 'created_at'],
+      attributes: ['name', 'username', 'email', 'password', 'created_at'],
     });
 
     if (!user || !(await comparePassword(password, user.password))) {
@@ -78,12 +88,13 @@ exports.login = async (req, res) => {
       });
     }
 
+    user.password = undefined;
+    const token = signToken(user.username);
+
     res.status(200).json({
       status: 'success',
-      user: {
-        email: user.email,
-        created_at: user.created_at,
-      },
+      token,
+      user,
     });
   } catch (err) {
     console.log(err.message);
