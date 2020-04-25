@@ -1,9 +1,18 @@
 const { Op } = require('sequelize');
+const { validationResult } = require('express-validator');
 
 const User = require('../models/userModel');
 
 exports.register = async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        status: 'fail',
+        errors: errors.array(),
+      });
+    }
+
     const { name, username, email, password } = req.body;
     const user = await User.findAll({
       where: {
@@ -11,8 +20,6 @@ exports.register = async (req, res) => {
       },
       // attributes: { exclude: ['password'] },
     });
-
-    console.log(user);
 
     if (user.length > 0) {
       return res.status(400).json({
