@@ -29,6 +29,11 @@ const User = db.define(
   },
   {
     timestamps: false,
+    defaultScope: {
+      attributes: {
+        exclude: ['password'],
+      },
+    },
   }
 );
 

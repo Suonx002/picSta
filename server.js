@@ -5,6 +5,8 @@ dotenv.config({ path: './config.env' });
 
 const userRoute = require('./routes/userRoutes');
 
+const app = express();
+
 // middlewares
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
