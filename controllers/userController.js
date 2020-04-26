@@ -98,7 +98,7 @@ exports.login = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getAllUsers = catchAsync(async (req, res) => {
+exports.getAllUsers = catchAsync(async (req, res, next) => {
   const users = await User.findAll();
 
   if (!users) {

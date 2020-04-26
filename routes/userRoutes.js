@@ -1,12 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-const {
-  protectRoute,
-  checkRegister,
-  checkLogin,
-} = require('../validations/validators');
+const { checkRegister, checkLogin } = require('../validations/validators');
+
 const userController = require('../controllers/userController');
+const auth = require('../middlewares/auth');
 
 // register route
 router.post('/register', checkRegister, userController.register);
@@ -15,6 +13,6 @@ router.post('/register', checkRegister, userController.register);
 router.post('/login', checkLogin, userController.login);
 
 // find all users
-router.route('/').get(protectRoute, userController.getAllUsers);
+router.route('/').get(auth.protectRoute, userController.getAllUsers);
 
 module.exports = router;
