@@ -8,6 +8,13 @@ const handleJWTExpiredError = () => {
   return new AppError('Your token has expired! Please log in again.', 401);
 };
 
+const handleDuplicateKey = () => {
+  return new AppError(
+    'Username or email is taken, please use a different one!',
+    400
+  );
+};
+
 module.exports = (err, req, res, next) => {
   let error = { ...err };
 
@@ -16,6 +23,9 @@ module.exports = (err, req, res, next) => {
   // json web token errors
   if (error.name === 'JsonWebTokenError') error = handleJWTError();
   if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
+  if (error.code === '23505') error = handleDuplicateKey();
+
+  console.log(error);
 
   res.status(error.statusCode || 500).json({
     status: 'fail',

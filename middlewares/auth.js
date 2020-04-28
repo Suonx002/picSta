@@ -3,7 +3,8 @@ const { promisify } = require('util');
 
 const catchAsync = require('../utils/catchAsync');
 
-const User = require('../models/userModel');
+// const User = require('../models/userModel');
+const pool = require('../database/pool');
 
 exports.protectRoute = catchAsync(async (req, res, next) => {
   let token;
@@ -26,11 +27,12 @@ exports.protectRoute = catchAsync(async (req, res, next) => {
 
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
-  const currentUser = await User.findOne({
-    where: {
-      username: decoded.username,
-    },
-  });
+  let currentUser = await pool.query(
+    'SELECT username FROM users WHERE username=$1',
+    [decoded.username]
+  );
+
+  currentUser = currentUser.rows[0];
 
   if (!currentUser) {
     return res.status(401).json({

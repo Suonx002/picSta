@@ -1,4 +1,4 @@
-const { Op } = require('sequelize');
+// const { Op } = require('sequelize');
 const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 
@@ -6,7 +6,9 @@ const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const { hashPassword, comparePassword } = require('../validations/validators');
 
-const User = require('../models/userModel');
+// const User = require('../models/userModel');
+
+const pool = require('../database/pool');
 
 const signToken = (username) => {
   const payload = { username };
@@ -28,42 +30,22 @@ exports.register = catchAsync(async (req, res, next) => {
   }
 
   const { name, username, email, password } = req.body;
-  const user = await User.findAll({
-    where: {
-      [Op.or]: [{ username }, { email }],
-    },
-    // attributes: { exclude: ['password'] },
-  });
-
-  if (user.length > 0) {
-    // return res.status(400).json({
-    //   status: 'fail',
-    //   message: 'Username or email is taken, please try a different one!',
-    // });
-    return next(
-      new AppError(
-        'Username or email is taken, please try a different one.',
-        400
-      )
-    );
-  }
 
   const hashedPassword = await hashPassword(password);
 
-  const newUser = await User.create({
-    name,
-    username,
-    email,
-    password: hashedPassword,
-  });
+  let user = await pool.query(
+    'INSERT INTO users(name,username,email,password) VALUES($1, $2, $3, $4) RETURNING name,username,email,created_at',
+    [name, username, email, hashedPassword]
+  );
 
-  newUser.password = undefined;
-  const token = signToken(newUser.username);
+  user = user.rows[0];
 
-  res.status(201).json({
+  const token = signToken(user.username);
+
+  res.status(200).json({
     status: 'success',
     token,
-    user: newUser,
+    data: user,
   });
 });
 
@@ -77,39 +59,46 @@ exports.login = catchAsync(async (req, res, next) => {
   }
   const { password, email } = req.body;
 
-  let user = await User.findOne({
-    where: {
-      email,
-    },
-    attributes: ['name', 'username', 'email', 'password', 'created_at'],
-  });
+  let user = await pool.query('SELECT * FROM users WHERE email=$1', [email]);
 
-  if (!user || !(await comparePassword(password, user.password))) {
-    return next(new AppError('Email or password is incorrect', 401));
+  user = user.rows[0];
+
+  // check if user exist in databse
+  if (!user) {
+    res.status(401).json({
+      status: 'fail',
+      message: 'Email or password is incorrect',
+    });
   }
 
-  user.password = undefined;
+  if (!(await comparePassword(password, user.password))) {
+    return res.status(401).json({
+      status: 'fail',
+      message: 'Email or password is incorrect.',
+    });
+  }
+
   const token = signToken(user.username);
+
+  user.password = undefined;
 
   res.status(200).json({
     status: 'success',
     token,
-    user,
+    data: user,
   });
 });
 
 exports.getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await User.findAll();
+  console.log(req.user);
+  let user = await pool.query(
+    'SELECT name,username,email,created_at FROM users'
+  );
 
-  if (!users) {
-    return res.status(400).json({
-      status: 'fail',
-      message: 'There are no users',
-    });
-  }
+  user = user.rows;
 
   res.status(200).json({
     status: 'success',
-    users,
+    data: user,
   });
 });

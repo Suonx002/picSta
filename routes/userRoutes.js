@@ -13,6 +13,10 @@ router.post('/register', checkRegister, userController.register);
 router.post('/login', checkLogin, userController.login);
 
 // find all users
-router.route('/').get(auth.protectRoute, userController.getAllUsers);
+router.route('/').get(
+  auth.protectRoute,
+
+  userController.getAllUsers
+);
 
 module.exports = router;
