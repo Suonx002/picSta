@@ -3,7 +3,6 @@ const { promisify } = require('util');
 
 const catchAsync = require('../utils/catchAsync');
 
-// const User = require('../models/userModel');
 const pool = require('../database/pool');
 
 exports.protectRoute = catchAsync(async (req, res, next) => {

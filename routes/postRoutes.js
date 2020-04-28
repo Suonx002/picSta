@@ -8,6 +8,6 @@ const { checkCreatePost } = require('../validations/validators');
 
 router
   .route('/')
-  .post(auth.protectRoute, checkCreatePost, postController.createPost);
+  .post(checkCreatePost, auth.protectRoute, postController.createPost);
 
 module.exports = router;

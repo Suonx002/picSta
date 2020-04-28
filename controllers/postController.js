@@ -3,10 +3,7 @@ const { validationResult } = require('express-validator');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 
-// const Post = require('../models/postModel');
-// const User = require('../models/userModel');
-
-// const { Post, User } = require('../models');
+const pool = require('../database/pool');
 
 exports.createPost = catchAsync(async (req, res, next) => {
   const errors = validationResult(req);
@@ -18,28 +15,22 @@ exports.createPost = catchAsync(async (req, res, next) => {
     });
   }
 
-  const { username } = req.user;
-  const { photo, description } = req.body;
+  const { photo, description, username } = req.body;
 
-  const user = await User.findOne({
-    where: {
-      username,
-    },
-    attributes: ['name', 'username', 'email', 'created_at'],
-  });
-
-  if (!user) {
-    next(new AppError('You are not allow to post', 401));
+  if (username !== req.user.username) {
+    console.log('in here');
+    next(new AppError('You are not allow to create post for this user', 401));
   }
 
-  const post = await Post.create({
-    photo,
-    description,
-  });
+  let post = await pool.query(
+    'INSERT INTO posts(photo, description,username) VALUES($1, $2, $3) RETURNING photo,description,username,created_at',
+    [photo, description, username]
+  );
+
+  post = post.rows[0];
 
   res.status(201).json({
     status: 'success',
-    post,
-    user,
+    data: post,
   });
 });

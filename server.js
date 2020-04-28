@@ -3,8 +3,11 @@ const dotenv = require('dotenv');
 
 dotenv.config({ path: './config.env' });
 
-const userRoute = require('./routes/userRoutes');
 const globalErrorsHandler = require('./controllers/errorController');
+const AppError = require('./utils/appError');
+
+const userRoute = require('./routes/userRoutes');
+const postRoute = require('./routes/postRoutes');
 
 const app = express();
 
@@ -14,6 +17,7 @@ app.use(express.json());
 
 // routes
 app.use('/api/v1/users', userRoute);
+app.use('/api/v1/posts', postRoute);
 
 // catach errors (all verbs: get post put patch ,etc.)
 app.all('*', (req, res, next) => {

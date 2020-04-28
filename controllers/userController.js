@@ -65,17 +65,11 @@ exports.login = catchAsync(async (req, res, next) => {
 
   // check if user exist in databse
   if (!user) {
-    res.status(401).json({
-      status: 'fail',
-      message: 'Email or password is incorrect',
-    });
+    return next(new AppError('Email or password is incorrect', 401));
   }
 
   if (!(await comparePassword(password, user.password))) {
-    return res.status(401).json({
-      status: 'fail',
-      message: 'Email or password is incorrect.',
-    });
+    return next(new AppError('Email or password is incorrect', 401));
   }
 
   const token = signToken(user.username);
@@ -90,7 +84,6 @@ exports.login = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllUsers = catchAsync(async (req, res, next) => {
-  console.log(req.user);
   let user = await pool.query(
     'SELECT name,username,email,created_at FROM users'
   );
