@@ -42,10 +42,21 @@ const checkCreatePost = [
     .withMessage('Description must be at least 20 characters'),
 ];
 
+const checkUpdatePost = [
+  check('description')
+    .not()
+    .isEmpty()
+    .withMessage('Description cannot be empty'),
+  check('description')
+    .isLength({ min: 20 })
+    .withMessage('Description must be at least 20 characters'),
+];
+
 module.exports = {
   hashPassword,
   comparePassword,
   checkRegister,
   checkLogin,
   checkCreatePost,
+  checkUpdatePost,
 };
