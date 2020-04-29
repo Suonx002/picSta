@@ -1,32 +1,15 @@
-const { validationResult } = require('express-validator');
-
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 
+const { checkErrorReqBody } = require('../validations/validators');
+
 const pool = require('../database/pool');
-
-const checkErrorReqBody = (req, res) => {
-  const errors = validationResult(req);
-
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      status: 'fail',
-      errors: errors.array(),
-    });
-  }
-
-  // next();
-};
 
 const createPost = catchAsync(async (req, res, next) => {
   checkErrorReqBody(req, res);
 
   const username = req.user.username;
   const { photo, description } = req.body;
-
-  if (!username) {
-    next(new AppError('You are not allow to create post for this user', 401));
-  }
 
   let post = await pool.query(
     'INSERT INTO posts(photo, description,username) VALUES($1, $2, $3) RETURNING photo,description,username,created_at',
@@ -44,13 +27,9 @@ const createPost = catchAsync(async (req, res, next) => {
 const updatePost = catchAsync(async (req, res, next) => {
   checkErrorReqBody(req, res);
 
-  const username = req.user.username;
   const id = req.params.id;
+  const username = req.user.username;
   const { description } = req.body;
-
-  if (!username) {
-    next(new AppError('You are not allow to update post for this user', 401));
-  }
 
   let post = await pool.query('SELECT * FROM posts WHERE post_id=$1', [id]);
   post = post.rows[0];
@@ -61,9 +40,7 @@ const updatePost = catchAsync(async (req, res, next) => {
 
   // check if user and post_id match
   if (username !== post.username) {
-    return next(
-      new AppError('You are not allow to update post for this user', 401)
-    );
+    return next(new AppError('You are not allow to update this post', 401));
   }
 
   post = await pool.query(
@@ -78,7 +55,36 @@ const updatePost = catchAsync(async (req, res, next) => {
   });
 });
 
+const deletePost = catchAsync(async (req, res, next) => {
+  const id = req.params.id;
+  const username = req.user.username;
+
+  let post = await pool.query('SELECT * FROM posts WHERE post_id=$1', [id]);
+  post = post.rows[0];
+
+  console.log(post);
+
+  if (!post) {
+    return next(new AppError('There are no post with the following id', 400));
+  }
+
+  // check if user and post_id match
+  if (username !== post.username) {
+    return next(new AppError('You are not allow to delete this post', 401));
+  }
+
+  post = await pool.query('DELETE FROM posts WHERE post_id=$1', [id]);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      message: 'Post successfully deleted',
+    },
+  });
+});
+
 module.exports = {
   createPost,
   updatePost,
+  deletePost,
 };

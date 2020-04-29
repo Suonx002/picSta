@@ -15,6 +15,7 @@ router
 
 router
   .route('/:id')
-  .put(checkUpdatePost, auth.protectRoute, postController.updatePost);
+  .put(checkUpdatePost, auth.protectRoute, postController.updatePost)
+  .delete(auth.protectRoute, postController.deletePost);
 
 module.exports = router;

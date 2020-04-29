@@ -1,10 +1,14 @@
 // const { Op } = require('sequelize');
-const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
-const { hashPassword, comparePassword } = require('../validations/validators');
+const {
+  trimAndLowercase,
+  checkErrorReqBody,
+  hashPassword,
+  comparePassword,
+} = require('../validations/validators');
 
 // const User = require('../models/userModel');
 
@@ -21,21 +25,21 @@ const signToken = (username) => {
 };
 
 exports.register = catchAsync(async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      status: 'fail',
-      errors: errors.array(),
-    });
-  }
+  checkErrorReqBody(req, res);
 
-  const { name, username, email, password } = req.body;
+  let { name, username, email, password } = req.body;
 
-  const hashedPassword = await hashPassword(password);
+  // trim and lowercase inputs
+  name = trimAndLowercase(name);
+  username = trimAndLowercase(username);
+  email = trimAndLowercase(email);
+
+  // hashing password
+  password = await hashPassword(password);
 
   let user = await pool.query(
     'INSERT INTO users(name,username,email,password) VALUES($1, $2, $3, $4) RETURNING name,username,email,created_at',
-    [name, username, email, hashedPassword]
+    [name, username, email, password]
   );
 
   user = user.rows[0];
@@ -50,14 +54,12 @@ exports.register = catchAsync(async (req, res, next) => {
 });
 
 exports.login = catchAsync(async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      status: 'fail',
-      errors: errors.array(),
-    });
-  }
-  const { password, email } = req.body;
+  checkErrorReqBody(req, res);
+
+  let { password, email } = req.body;
+
+  // lowercase email
+  email = trimAndLowercase(email);
 
   let user = await pool.query('SELECT * FROM users WHERE email=$1', [email]);
 

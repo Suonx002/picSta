@@ -1,5 +1,18 @@
-const { check } = require('express-validator');
+const { check, validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
+
+const trimAndLowercase = (text) => text.trim().toLowerCase();
+
+const checkErrorReqBody = (req, res) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      status: 'fail',
+      errors: errors.array(),
+    });
+  }
+};
 
 const hashPassword = async (password) => {
   return await bcrypt.hash(password, 12);
@@ -53,6 +66,8 @@ const checkUpdatePost = [
 ];
 
 module.exports = {
+  trimAndLowercase,
+  checkErrorReqBody,
   hashPassword,
   comparePassword,
   checkRegister,
