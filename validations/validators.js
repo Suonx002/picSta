@@ -16,6 +16,8 @@ const checkErrorReqBody = (req, res) => {
   }
 };
 
+/* Auth VALIDATIONS */
+
 const hashPassword = async (password) => {
   return await bcrypt.hash(password, 12);
 };
@@ -46,6 +48,8 @@ const checkLogin = [
   check('password').not().isEmpty().withMessage('Password cannot be empty'),
 ];
 
+/* POST VALIDATIONS */
+
 const checkCreatePost = [
   check('photo').not().isEmpty().withMessage('Photo cannot be empty'),
   check('description')
@@ -67,6 +71,14 @@ const checkUpdatePost = [
     .withMessage('Description must be at least 20 characters'),
 ];
 
+/* COMMENT VALIDATIONS */
+const checkCreateComment = [
+  check('comment').not().isEmpty().withMessage('Comment cannot be empty'),
+  check('comment')
+    .isLength({ min: 10 })
+    .withMessage('Comment must be at least 10 characters'),
+];
+
 module.exports = {
   trimAndLowercase,
   checkErrorReqBody,
@@ -76,4 +88,5 @@ module.exports = {
   checkLogin,
   checkCreatePost,
   checkUpdatePost,
+  checkCreateComment,
 };

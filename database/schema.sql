@@ -18,3 +18,13 @@ CREATE TABLE posts
     username VARCHAR(100) REFERENCES users(username) ON DELETE CASCADE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+-- Create table comments
+CREATE TABLE comments
+(
+    comment_id SERIAL PRIMARY KEY,
+    comment TEXT NOT NULL,
+    username VARCHAR(100) REFERENCES users(username) ON DELETE CASCADE,
+    post_id INT REFERENCES posts(post_id) ON DELETE CASCADE,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);

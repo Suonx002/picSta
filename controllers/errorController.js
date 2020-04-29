@@ -25,9 +25,6 @@ module.exports = (err, req, res, next) => {
   if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
   if (error.code === '23505') error = handleDuplicateKey();
 
-  // console.log(error);
-  console.log(err);
-
   res.status(error.statusCode || 500).json({
     status: 'fail',
     data: {
