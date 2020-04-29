@@ -39,6 +39,12 @@ const getCommentsByPostId = catchAsync(async (req, res, next) => {
     return next(new AppError('There are no post with this ID', 400));
   }
 
+  // adding post with comments
+  // let comments = await pool.query(
+  //   'SELECT * FROM comments c LEFT JOIN posts p ON c.post_id=p.post_id  WHERE c.post_id=$1',
+  //   [post.post_id]
+  // );
+
   let comments = await pool.query('SELECT * FROM comments WHERE post_id=$1', [
     post.post_id,
   ]);
@@ -65,10 +71,15 @@ const getSingleComment = catchAsync(async (req, res, next) => {
     return next(new AppError('There are no post with this ID', 400));
   }
 
-  let comment = await pool.query(
-    'SELECT * FROM comments c LEFT JOIN posts p ON c.post_id=p.post_id WHERE c.comment_id=$1',
-    [commentId]
-  );
+  // adding post with comments
+  // let comment = await pool.query(
+  //   'SELECT * FROM comments c LEFT JOIN posts p ON c.post_id=p.post_id WHERE c.comment_id=$1',
+  //   [commentId]
+  // );
+  let comment = await pool.query('SELECT * FROM comments WHERE comment_id=$1', [
+    commentId,
+  ]);
+
   comment = comment.rows[0];
 
   if (!comment) {
