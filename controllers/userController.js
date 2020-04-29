@@ -24,7 +24,23 @@ const signToken = (username) => {
   return token;
 };
 
-exports.register = catchAsync(async (req, res, next) => {
+const getMe = catchAsync(async (req, res, next) => {
+  const username = req.user.username;
+
+  let user = await pool.query(
+    'SELECT name,username,email,created_at FROM users WHERE username=$1',
+    [username]
+  );
+
+  user = user.rows[0];
+
+  res.status(200).json({
+    status: 'success',
+    data: user,
+  });
+});
+
+const register = catchAsync(async (req, res, next) => {
   checkErrorReqBody(req, res);
 
   let { name, username, email, password } = req.body;
@@ -53,7 +69,7 @@ exports.register = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.login = catchAsync(async (req, res, next) => {
+const login = catchAsync(async (req, res, next) => {
   checkErrorReqBody(req, res);
 
   let { password, email } = req.body;
@@ -85,7 +101,7 @@ exports.login = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getAllUsers = catchAsync(async (req, res, next) => {
+const getAllUsers = catchAsync(async (req, res, next) => {
   let user = await pool.query(
     'SELECT name,username,email,created_at FROM users'
   );
@@ -97,3 +113,10 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
     data: user,
   });
 });
+
+module.exports = {
+  getMe,
+  register,
+  login,
+  getAllUsers,
+};

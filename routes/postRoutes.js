@@ -11,10 +11,12 @@ const {
 
 router
   .route('/')
+  .get(postController.getPosts)
   .post(checkCreatePost, auth.protectRoute, postController.createPost);
 
 router
   .route('/:id')
+  .get(postController.getPostById)
   .put(checkUpdatePost, auth.protectRoute, postController.updatePost)
   .delete(auth.protectRoute, postController.deletePost);
 

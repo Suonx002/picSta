@@ -30,6 +30,8 @@ module.exports = (err, req, res, next) => {
 
   res.status(error.statusCode || 500).json({
     status: 'fail',
-    message: error.message || 'Server Error. Please try again later.',
+    data: {
+      message: error.message || 'Server Error. Please try again later.',
+    },
   });
 };

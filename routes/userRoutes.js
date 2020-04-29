@@ -6,6 +6,9 @@ const { checkRegister, checkLogin } = require('../validations/validators');
 const userController = require('../controllers/userController');
 const auth = require('../middlewares/auth');
 
+// get me
+router.get('/me', auth.protectRoute, userController.getMe);
+
 // register route
 router.post('/register', checkRegister, userController.register);
 

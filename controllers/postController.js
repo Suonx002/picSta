@@ -5,6 +5,37 @@ const { checkErrorReqBody } = require('../validations/validators');
 
 const pool = require('../database/pool');
 
+const getPosts = catchAsync(async (req, res, next) => {
+  // get posts and order by created_at
+  let posts = await pool.query('SELECT * FROM posts ORDER BY created_at DESC');
+  posts = posts.rows;
+
+  if (!posts) {
+    return next(new AppError('There are no posts', 400));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: posts,
+  });
+});
+
+const getPostById = catchAsync(async (req, res, next) => {
+  const id = req.params.id;
+  let post = await pool.query('SELECT * FROM posts WHERE post_id=$1', [id]);
+
+  post = post.rows[0];
+
+  if (!post) {
+    return next(new AppError('There is no post with this ID', 400));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: post,
+  });
+});
+
 const createPost = catchAsync(async (req, res, next) => {
   checkErrorReqBody(req, res);
 
@@ -62,8 +93,6 @@ const deletePost = catchAsync(async (req, res, next) => {
   let post = await pool.query('SELECT * FROM posts WHERE post_id=$1', [id]);
   post = post.rows[0];
 
-  console.log(post);
-
   if (!post) {
     return next(new AppError('There are no post with the following id', 400));
   }
@@ -84,6 +113,8 @@ const deletePost = catchAsync(async (req, res, next) => {
 });
 
 module.exports = {
+  getPosts,
+  getPostById,
   createPost,
   updatePost,
   deletePost,
