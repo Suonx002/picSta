@@ -8,6 +8,7 @@ const pool = require('../database/pool');
 const getPosts = catchAsync(async (req, res, next) => {
   // get posts and order by created_at
   let posts = await pool.query('SELECT * FROM posts ORDER BY created_at DESC');
+
   posts = posts.rows;
 
   if (!posts) {
@@ -21,7 +22,7 @@ const getPosts = catchAsync(async (req, res, next) => {
 });
 
 const getPostById = catchAsync(async (req, res, next) => {
-  const id = req.params.id;
+  const id = req.params.postId;
   let post = await pool.query('SELECT * FROM posts WHERE post_id=$1', [id]);
 
   post = post.rows[0];
@@ -58,7 +59,7 @@ const createPost = catchAsync(async (req, res, next) => {
 const updatePost = catchAsync(async (req, res, next) => {
   checkErrorReqBody(req, res);
 
-  const id = req.params.id;
+  const id = req.params.postId;
   const username = req.user.username;
   const { description } = req.body;
 
@@ -87,7 +88,7 @@ const updatePost = catchAsync(async (req, res, next) => {
 });
 
 const deletePost = catchAsync(async (req, res, next) => {
-  const id = req.params.id;
+  const id = req.params.postId;
   const username = req.user.username;
 
   let post = await pool.query('SELECT * FROM posts WHERE post_id=$1', [id]);

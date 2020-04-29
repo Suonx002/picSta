@@ -12,7 +12,7 @@ const {
 } = require('../validations/validators');
 
 // middleware for comment
-router.use('/:id/comments', commentRoute);
+router.use('/:postId/comments', commentRoute);
 
 router
   .route('/')
@@ -20,7 +20,7 @@ router
   .post(auth.protectRoute, checkCreatePost, postController.createPost);
 
 router
-  .route('/:id')
+  .route('/:postId')
   .get(postController.getPostById)
   .put(auth.protectRoute, checkUpdatePost, postController.updatePost)
   .delete(auth.protectRoute, postController.deletePost);
