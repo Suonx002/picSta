@@ -130,9 +130,42 @@ const updateComment = catchAsync(async (req, res, next) => {
   });
 });
 
+const deleteComment = catchAsync(async (req, res, next) => {
+  const { postId, commentId } = req.params;
+  const { username } = req.user;
+
+  let post = await pool.query('SELECT * FROM posts WHERE post_id=$1', [postId]);
+  post = post.rows[0];
+
+  if (!post) {
+    return next('There are not post with this ID', 400);
+  }
+
+  let comment = await pool.query('SELECT * FROM comments WHERE comment_id=$1', [
+    commentId,
+  ]);
+  comment = comment.rows[0];
+
+  if (!comment) {
+    return next(new AppError('There are no comment with this ID', 400));
+  }
+
+  if (username !== comment.username) {
+    return next(new AppError('You are not allow to delete this comment', 401));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      message: 'Comment successfully deleted',
+    },
+  });
+});
+
 module.exports = {
   createComment,
   getCommentsByPostId,
   getSingleComment,
   updateComment,
+  deleteComment,
 };

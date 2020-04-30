@@ -19,6 +19,7 @@ router
 router
   .route('/:commentId')
   .get(commentController.getSingleComment)
-  .put(auth.protectRoute, checkUpdateComment, commentController.updateComment);
+  .put(auth.protectRoute, checkUpdateComment, commentController.updateComment)
+  .delete(auth.protectRoute, commentController.deleteComment);
 
 module.exports = router;
