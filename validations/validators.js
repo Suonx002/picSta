@@ -79,6 +79,13 @@ const checkCreateComment = [
     .withMessage('Comment must be at least 10 characters'),
 ];
 
+const checkUpdateComment = [
+  check('comment').not().isEmpty().withMessage('Comment cannot be empty'),
+  check('comment')
+    .isLength({ min: 10 })
+    .withMessage('Comment must be at least 10 characters'),
+];
+
 module.exports = {
   trimAndLowercase,
   checkErrorReqBody,
@@ -89,4 +96,5 @@ module.exports = {
   checkCreatePost,
   checkUpdatePost,
   checkCreateComment,
+  checkUpdateComment,
 };
