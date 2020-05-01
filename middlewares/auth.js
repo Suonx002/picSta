@@ -2,10 +2,11 @@ const jwt = require('jsonwebtoken');
 const { promisify } = require('util');
 
 const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 
 const pool = require('../database/pool');
 
-exports.protectRoute = catchAsync(async (req, res, next) => {
+const protectRoute = catchAsync(async (req, res, next) => {
   let token;
 
   // getting the token and check
@@ -17,11 +18,12 @@ exports.protectRoute = catchAsync(async (req, res, next) => {
   }
 
   if (!token) {
-    return res.status(401).json({
-      status: 'fail',
-      message:
+    return next(
+      new AppError(
         'You are not logged in to access this. PLease log in to get access.',
-    });
+        401
+      )
+    );
   }
 
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
@@ -34,13 +36,31 @@ exports.protectRoute = catchAsync(async (req, res, next) => {
   currentUser = currentUser.rows[0];
 
   if (!currentUser) {
-    return res.status(401).json({
-      status: 'fail',
-      message: 'The user belonging to this token is no longer exist',
-    });
+    return next(
+      new AppError('The user belonging to this token is no longer exist', 401)
+    );
   }
 
   req.user = currentUser;
 
   next();
 });
+
+const apiKey = catchAsync(async (req, res, next) => {
+  let instagram_apikey;
+
+  if (req.headers.instagram_apikey) {
+    instagram_apikey = req.headers.instagram_apikey;
+  }
+
+  if (!instagram_apikey || instagram_apikey !== process.env.INSTAGRAM_APIKEY) {
+    return next(new AppError('Failed to verify authorization', 401));
+  }
+
+  next();
+});
+
+module.exports = {
+  protectRoute,
+  apiKey,
+};

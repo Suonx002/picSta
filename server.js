@@ -11,11 +11,14 @@ const postRoute = require('./routes/postRoutes');
 const commentRoute = require('./routes/commentRoutes');
 const likeRoute = require('./routes/likeRoutes');
 
+const auth = require('./middlewares/auth');
+
 const app = express();
 
 // middlewares
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+app.use(auth.apiKey);
 
 // routes
 app.use('/api/v1/users', userRoute);

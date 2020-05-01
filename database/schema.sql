@@ -37,3 +37,4 @@ CREATE TABLE likes_post
     post_id INT REFERENCES posts(post_id) ON DELETE CASCADE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
