@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const commentRoute = require('./commentRoutes');
+const likeRoute = require('./likeRoutes');
 
 const auth = require('../middlewares/auth');
 const postController = require('../controllers/postController');
@@ -11,8 +12,11 @@ const {
   checkUpdatePost,
 } = require('../validations/validators');
 
-// middleware for comment
+// middleware for comments
 router.use('/:postId/comments', commentRoute);
+
+// middleware for likes
+router.use('/:postId/likes', likeRoute);
 
 router
   .route('/')
