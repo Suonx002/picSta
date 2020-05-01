@@ -1,11 +1,11 @@
 const AppError = require('../utils/appError');
 
 const handleJWTError = () => {
-  return new AppError('Invalid token. Please log in again!', 401);
+  return new AppError('Invalid token. Failed to verify authorization.', 401);
 };
 
 const handleJWTExpiredError = () => {
-  return new AppError('Your token has expired! Please log in again.', 401);
+  return new AppError('Your token has expired!', 401);
 };
 
 const handleDuplicateKey = () => {
@@ -18,6 +18,7 @@ const handleDuplicateKey = () => {
 module.exports = (err, req, res, next) => {
   let error = { ...err };
 
+  console.log(err.code);
   error.message = err.message;
 
   // json web token errors

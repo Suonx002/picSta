@@ -57,6 +57,11 @@ const apiKey = catchAsync(async (req, res, next) => {
     return next(new AppError('Failed to verify authorization', 401));
   }
 
+  // sign token (in order for anyone to access all backend api, they must have jwt secret)
+  const token = jwt.sign({}, process.env.JWT_SECRET);
+
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
   next();
 });
 

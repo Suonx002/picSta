@@ -1,10 +1,12 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 
 dotenv.config({ path: './config.env' });
 
 const globalErrorsHandler = require('./controllers/errorController');
 const AppError = require('./utils/appError');
+const catchAsync = require('./utils/catchAsync');
 
 const userRoute = require('./routes/userRoutes');
 const postRoute = require('./routes/postRoutes');
@@ -18,7 +20,9 @@ const app = express();
 // middlewares
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-app.use(auth.apiKey);
+
+// need apikey to access any routes
+app.use('/api/v1', auth.apiKey);
 
 // routes
 app.use('/api/v1/users', userRoute);
