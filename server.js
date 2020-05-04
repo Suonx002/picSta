@@ -30,7 +30,7 @@ app.use('/api/v1/posts', postRoute);
 app.use('/api/v1/comments', commentRoute);
 app.use('/api/v1/likes', likeRoute);
 
-// catach errors (all verbs: get post put patch ,etc.)
+// catch errors (all verbs: get post put patch ,etc.)
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 400));
 });

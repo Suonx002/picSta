@@ -91,7 +91,6 @@ const login = catchAsync(async (req, res, next) => {
   }
 
   const token = signToken(user.username);
-
   user.password = undefined;
 
   res.status(200).json({

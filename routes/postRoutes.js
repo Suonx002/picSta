@@ -6,6 +6,7 @@ const likeRoute = require('./likeRoutes');
 
 const auth = require('../middlewares/auth');
 const postController = require('../controllers/postController');
+const multerController = require('../controllers/multerController');
 
 const {
   checkCreatePost,
@@ -21,7 +22,11 @@ router.use('/:postId/likes', likeRoute);
 router
   .route('/')
   .get(postController.getPosts)
-  .post(auth.protectRoute, checkCreatePost, postController.createPost);
+  .post(
+    auth.protectRoute,
+    multerController.single('photo'),
+    postController.createPost
+  );
 
 router
   .route('/:postId')

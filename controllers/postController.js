@@ -2,6 +2,7 @@ const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 
 const { checkErrorReqBody } = require('../validations/validators');
+const cloudinaryController = require('./cloudinaryController');
 
 const pool = require('../database/pool');
 
@@ -43,9 +44,12 @@ const createPost = catchAsync(async (req, res, next) => {
   const username = req.user.username;
   const { photo, description } = req.body;
 
+  const { path } = req.file;
+  const url = await cloudinaryController(path, 'instagram');
+
   let post = await pool.query(
     'INSERT INTO posts(photo, description,username) VALUES($1, $2, $3) RETURNING photo,description,username,created_at',
-    [photo, description, username]
+    [url.url, description, username]
   );
 
   post = post.rows[0];
